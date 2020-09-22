@@ -1,0 +1,100 @@
+#include<iostream>
+using namespace std;
+
+typedef enum { Link, Thread } PointerTag;
+//Link == 0，表示左右孩子
+//Thread == 1，表示前驱和后继
+
+
+typedef struct BiThrNode
+{
+	int data;
+	PointerTag LTag;
+	PointerTag RTag;
+	BiThrNode* Lchild;
+	BiThrNode* Rchild;
+}BiThrNode, *BiThrTree;
+
+BiThrTree tre;//用于存储前结点
+
+
+void InitTree(BiThrTree& tree)
+{
+	tree = new BiThrNode;
+	tree->Lchild = NULL;
+	tree->LTag = Link;
+	tree->Rchild = NULL;
+	tree->RTag = Link;
+}
+
+
+void CreateTree(BiThrTree& tree)
+{
+	int num;
+	cin >> num;
+	if (num == 0)
+		tree = NULL;
+	else
+	{
+		tree = new BiThrNode;
+		if (!tree)
+			exit(OVERFLOW);
+		tree->data = num;
+		CreateTree(tree->Lchild);
+		CreateTree(tree->Rchild);
+	}
+	return;
+}
+
+
+void InThreading(BiThrTree& tree)
+{
+	if (tree == NULL)
+		return;
+
+	InThreading(tree->Lchild);
+
+	if (tree->Lchild == NULL)
+	{
+		tree->LTag = Thread;
+		tree->Lchild = tre;
+	}
+	if (tre->Rchild == NULL)
+	{
+		tre->RTag = Thread;
+		tre->Rchild = tree;
+	}
+	tre = tree;
+
+	InThreading(tree->Rchild);
+}
+
+void PreOrderTree(BiThrTree& T)
+{
+	BiThrTree p;
+	p = T->Lchild;
+	while (p != T)
+	{
+		while (p->LTag == Link)
+			p = p->Lchild;
+		cout << p->data << endl;
+		while (p->RTag == Thread && p->Rchild != T)
+		{
+			p = p->Rchild;
+			cout << p->data << endl;
+		}
+		p = p->Rchild;
+	}
+}
+
+
+
+int main()
+{
+	BiThrTree roof;
+	InitTree(roof);
+	InitTree(tre);
+	CreateTree(roof);
+	InThreading(roof);
+	PreOrderTree(roof);
+}
